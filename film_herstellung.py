@@ -1,20 +1,22 @@
-import pandas as pd
-import seaborn as sns
-import numpy as np
+import moviepy.video.io.ImageSequenceClip
 import matplotlib.pyplot as plt
+from matplotlib import rc
+import seaborn as sns
+import pandas as pd
+import numpy as np
 import argparse
 import sys
 import re
 import os
 from pandas import DataFrame as df
-import moviepy.video.io.ImageSequenceClip
 
 
 class Stellt_video:
 
     def __init__(self, pfad_2_d, ordner, pics):
-        self.pics = pics
-        self.pfad_2_d = pfad_2_d
+        self.pics      = pics
+        self.pfad_2_d  = pfad_2_d
+        self.sim_n_ord = os.path.join(self.pfad_2_d, ordner)
         # FE-AF Ordner
         self.fe_af_o = os.path.join(self.pfad_2_d, ordner, "FE-AF")
         # FE-FE Ordner
@@ -24,7 +26,7 @@ class Stellt_video:
         self.fe_af_oal = pd.read_csv(os.path.join(self.fe_af_o,
                                                   'out-alpha-sp-g.out'),
                                      delim_whitespace=True, dtype=float,
-                                     names = ['Vg_a_fe_af', 'Energie_a_fe_af',
+                                     names = ['Vg_a_fe_af', 'Energie',
                                               'DOS_a_fe_af', 'T_a_fe_af']) 
         # Lies Dateien (output beta FE-AF)
         self.fe_af_obe = pd.read_csv(os.path.join(self.fe_af_o,
@@ -49,50 +51,93 @@ class Stellt_video:
                                       self.fe_fe_oal, self.fe_fe_obe],
                                      axis=1))
 
-        print (self.df_ovoll)
-        self.df_ovoll =self.df_ovoll.drop(columns = ['Vg_a_fe_af',
-                                                     'Vg_b_fe_af',
+        self.df_ovoll =self.df_ovoll.drop(columns = ['Vg_b_fe_af',
                                                      'Vg_a_fe_fe',
-                                                     'Vg_b_fe_fe'])
-        print (self.df_ovoll)
+                                                     'Vg_b_fe_fe',
+                                                     'Energie_b_fe_af',
+                                                     'Energie_a_fe_fe',
+                                                     'Energie_b_fe_fe'])
 
-    
-        self.out_d_fe_af = os.path.join(self.fe_af_o, 'pics')
-        self.out_d_fe_fe = os.path.join(self.fe_fe_o, 'pics')
-
-    def Make_pics(self):
         try:
-            self.out_d_fe_af = os.mkdir(os.path.join(self.fe_af_o, 'pics'))
-            self.out_d_fe_fe = os.mkdir(os.path.join(self.fe_fe_o, 'pics'))
+            self.out_d_pic = os.mkdir(os.path.join(self.sim_n_ord, 'pics'))
         except FileExistsError:
-            self.out_d_fe_af = os.path.join(self.fe_af_o, 'pics')
-            self.out_d_fe_fe = os.path.join(self.fe_fe_o, 'pics')
+            self.out_d_pic = os.path.join(self.sim_n_ord, 'pics')
         else:
             pass
 
+    def Make_pics(self):
+
+
         for i in range(self.pics):
-            # Bilder fuer FE-AF Zustand
+            Vg = self.df_ovoll['Vg_a_fe_af'][i * 2000]
+            # Bilder
             self.voll_plot, axs = plt.subplots(2)
-            sns.lineplot(ax = axs[0],
-                         x = "Energie_a_fe_af",
+            fe_af_a = sns.lineplot(ax = axs[0],
+                         x = "Energie",
                          y = "T_a_fe_af",
                          data = self.df_ovoll[i * 2000 : 2000 * (i + 1)],
-                         linewidth=2, color='red')
-            sns.lineplot(ax=axs[0],
-                         x = "Energie_b_fe_af",
+                         linewidth=2,
+                         color='red',
+                         label='\u03B1')
+            fe_af_b = sns.lineplot(ax=axs[0],
+                         x = "Energie",
                          y = "T_b_fe_af",
                          data = self.df_ovoll[i * 2000 : 2000 * (i + 1)],
-                         linewidth=2, color='blue')
-            sns.lineplot(ax = axs[1],
-                         x = "Energie_a_fe_fe",
+                         linewidth=2,
+                         color='blue',
+                         label='\u03B2')
+            fe_fe_a = sns.lineplot(ax = axs[1],
+                         x = "Energie",
                          y = "T_a_fe_fe",
                          data = self.df_ovoll[i * 2000 : 2000 * (i + 1)],
-                         linewidth=2, color='red')
-            sns.lineplot(ax=axs[1],
-                         x = "Energie_b_fe_fe",
+                         linewidth=2,
+                         color='red',
+                         label='\u03B1')
+            fe_fe_b = sns.lineplot(ax=axs[1],
+                         x = "Energie",
                          y = "T_b_fe_fe",
                          data = self.df_ovoll[i * 2000 : 2000 * (i + 1)],
-                         linewidth=2, color='blue')
+                         linewidth=2,
+                         color='blue',
+                         label='\u03B2')
+
+            #fe_af_a.legend(loc = 'upper right',
+            #               fontsize = 5,
+            #               title_fontsize = 6,
+            #               shadow = True,
+            #               bbox_to_anchor= (1.13, 1),
+            #               title = 'E^(1)_(\u03B1,1) = {:.3f} \n'
+            #                       'E^(2)_(\u03B1,1) = {:.3f}'\
+            #                       .format(-0.26 - Vg, 0.26 - Vg))
+            #fe_fe_b.legend(loc = 'upper right',
+            #               fontsize = 6,
+            #               title_fontsize = 7,
+            #               shadow = True,
+            #               bbox_to_anchor= (1.13, 1),
+            #               title = 'E^(1)_(\u03B1,1) = {:.3f} \n'
+            #                       'E^(2)_(\u03B1,1) = {:.3f}'\
+            #                       .format(-0.26 - Vg, 0.26 - Vg))
+
+            fe_af_a.legend(loc = 'upper right',
+                           fontsize = 5,
+                           title_fontsize = 6,
+                           shadow = True,
+                           bbox_to_anchor= (1.13, 1),
+                           title = '\u03F5^(3)_(\u03B1,1) = {:.3f} \n'
+                                   '\u03F5^(3)_(\u03B1,2) = {:.3f} \n'
+                                   '\u03F5^(4)_(\u03B1,1) = {:.3f} \n'
+                                   '\u03F5^(4)_(\u03B1,2) = {:.3f}'\
+                                   .format(-0.17 - Vg, 0.3 - Vg, -0.17 - Vg, 0.1 - Vg))
+            fe_fe_b.legend(loc = 'upper right',
+                           fontsize = 6,
+                           title_fontsize = 7,
+                           shadow = True,
+                           bbox_to_anchor= (1.13, 1),
+                           title = '\u03F5^(3)_(\u03B1,1) = {:.3f} \n'
+                                   '\u03F5^(3)_(\u03B1,2) = {:.3f} \n'
+                                   '\u03F5^(4)_(\u03B1,1) = {:.3f} \n'
+                                   '\u03F5^(4)_(\u03B1,2) = {:.3f}'\
+                                   .format(-0.17 - Vg, 0.3 - Vg, -0.17 - Vg, 0.3 - Vg))
 
             axs[0].set(xlabel = ' ')
             axs[0].set(ylabel = 'T(arb. units)')
@@ -103,65 +148,20 @@ class Stellt_video:
             axs[1].set_xlim((-0.5, 0.5))
             axs[1].set_ylim((0,1))
 
-            #self.fe_af_oal_plot = sns.lineplot(x = "Energie_a_fe_af", y = "T_a_fe_af",
-            #                                   data = self.df_ovoll[i*2000:
-            #                                                         2000*(i+1)],
-            #                              linewidth=2, color='red')
-            #self.fe_af_oal_plot = sns.lineplot(x = "Energie_b_fe_af", y = "T_b_fe_af",
-            #                                   data = self.df_ovoll[i*2000:
-            #                                                         2000*(i+1)],
-            #                              linewidth=2, color='blue')
-    
-            #self.fe_af_oal_plot.set_xlabel('Energy (eV)')
-            #self.fe_af_oal_plot.set_ylabel('T (arb. units)')
-            #self.fe_af_oal_plot.set_xlim(-0.5,0.5)
-            #self.fe_af_oal_plot.set_ylim(0,1)
-            #self.fe_af_oal_plot.figure.savefig(os.path.join(self.out_d_fe_af,
-            #                                   'test_seaborn0'+str(i)+'.png'), dpi=300)
-            self.voll_plot.figure.savefig(os.path.join(self.out_d_fe_af,
-                                               'test_seaborn0'+str(i)+'.png'), dpi=300)
-            #plt(self.voll_plot.figure)
-            #self.fe_af_oal_plot.figure.clf()
-
-            # Bilder fuer FE-FE Zustand
-            #self.fe_fe_oal_plot = sns.lineplot(x = "Energie_a_fe_fe", y = "T_a_fe_fe",
-            #                                   data = self.df_ovoll[i*2000:
-            #                                                         2000*(i+1)],
-            #                              linewidth=2, color='red')
-            #self.fe_fe_oal_plot = sns.lineplot(x = "Energie_b_fe_fe", y = "T_b_fe_fe",
-            #                                   data = self.df_ovoll[i*2000:
-            #                                                         2000*(i+1)],
-            #                              linewidth=2, color='blue')
-    
-            #self.fe_fe_oal_plot.set_xlabel('Energy (eV)')
-            #self.fe_fe_oal_plot.set_ylabel('T (arb. units)')
-            #self.fe_fe_oal_plot.set_xlim(-0.5,0.5)
-            #self.fe_fe_oal_plot.set_ylim(0,1)
-            #sns.set(font_scale = 1)
-            #self.fe_fe_oal_plot.figure.savefig(os.path.join(self.out_d_fe_fe,
-            #                                   'test_seaborn0'+str(i)+'.png'), dpi=300)
-            #self.fe_fe_oal_plot.figure.clf()
+            self.voll_plot.figure.savefig(os.path.join(self.out_d_pic,
+                                               'pic0'+str(i)+'.png'), dpi=300)
 
     def Make_vid(self):
         fps = 12
 
-        # Video fuer FE-AF Zustand
-        bild    = os.listdir(self.out_d_fe_af)
+        # Video
+        bild = os.listdir(self.out_d_pic)
         bild.sort(key=lambda f: int(re.sub('\D', '', f)))
 
-        bild_datei = [self.out_d_fe_af + '/' + img for img in bild]
+        bild_datei = [self.out_d_pic + '/' + img for img in bild]
 
         clip = moviepy.video.io.ImageSequenceClip.ImageSequenceClip(bild_datei, fps=fps)
-        clip.write_videofile(os.path.join(self.fe_af_o, 'Toy_modelle.mp4'))
-
-        # Video fuer FE-FE Zustand
-        #bild    = os.listdir(self.out_d_fe_fe)
-        #bild.sort(key=lambda f: int(re.sub('\D', '', f)))
-
-        #bild_datei = [self.out_d_fe_fe + '/' + img for img in bild]
-
-        #clip = moviepy.video.io.ImageSequenceClip.ImageSequenceClip(bild_datei, fps=fps)
-        #clip.write_videofile(os.path.join(self.fe_fe_o, 'Toy_modelle.mp4'))
+        clip.write_videofile(os.path.join(self.sim_n_ord , 'Toy_modell.mp4'))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
