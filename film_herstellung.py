@@ -1,15 +1,16 @@
 import moviepy.video.io.ImageSequenceClip
 import matplotlib.pyplot as plt
-from matplotlib import rc
 import seaborn as sns
 import pandas as pd
 import numpy as np
+import time
 import argparse
 import sys
 import re
 import os
 from pandas import DataFrame as df
-
+from matplotlib import rc
+from tqdm import tqdm
 
 class Stellt_video:
 
@@ -59,16 +60,15 @@ class Stellt_video:
                                                      'Energie_b_fe_fe'])
 
         try:
-            self.out_d_pic = os.mkdir(os.path.join(self.sim_n_ord, 'pics'))
+            os.mkdir(os.path.join(self.sim_n_ord, 'pics'))
+            self.out_d_pic = os.path.join(self.sim_n_ord, 'pics')
         except FileExistsError:
             self.out_d_pic = os.path.join(self.sim_n_ord, 'pics')
         else:
             pass
 
     def Make_pics(self):
-
-
-        for i in range(self.pics):
+        for i in tqdm(range(self.pics)):
             Vg = self.df_ovoll['Vg_a_fe_af'][i * 2000]
             # Bilder
             self.voll_plot, axs = plt.subplots(2)
@@ -101,43 +101,71 @@ class Stellt_video:
                          color='blue',
                          label='\u03B2')
 
+            ### Legend Kette
             #fe_af_a.legend(loc = 'upper right',
             #               fontsize = 5,
             #               title_fontsize = 6,
             #               shadow = True,
             #               bbox_to_anchor= (1.13, 1),
-            #               title = 'E^(1)_(\u03B1,1) = {:.3f} \n'
-            #                       'E^(2)_(\u03B1,1) = {:.3f}'\
-            #                       .format(-0.26 - Vg, 0.26 - Vg))
+            #               title = 'E^(1)_(\u03B1,1) = {: .3f}\n'
+            #                       'E^(1)_(\u03B1,2) = {: .3f}\n'
+            #                       'E^(2)_(\u03B1,1) = {: .3f}\n'
+            #                       'E^(2)_(\u03B1,2) = {: .3f}\n'
+            #                       'Vg = {: .3f}'
+            #                       .format(-0.26 - Vg, 0.26 - Vg,
+            #                               -0.26 - Vg, 0.26 - Vg,
+            #                               Vg))
             #fe_fe_b.legend(loc = 'upper right',
             #               fontsize = 6,
             #               title_fontsize = 7,
             #               shadow = True,
             #               bbox_to_anchor= (1.13, 1),
-            #               title = 'E^(1)_(\u03B1,1) = {:.3f} \n'
-            #                       'E^(2)_(\u03B1,1) = {:.3f}'\
-            #                       .format(-0.26 - Vg, 0.26 - Vg))
+            #               title = 'E^(1)_(\u03B1,1) = {: .3f}\n'
+            #                       'E^(1)_(\u03B1,2) = {: .3f}\n'
+            #                       'E^(2)_(\u03B1,1) = {: .3f}\n'
+            #                       'E^(2)_(\u03B1,2) = {: .3f}'\
+            #                       .format(-0.26 - Vg, 0.26 - Vg,
+            #                               -0.26 - Vg, 0.26 - Vg))
 
+            ### Legend SMMs
+            #fe_af_a.legend(loc = 'upper right',
+            #               fontsize = 5,
+            #               title_fontsize = 6,
+            #               shadow = True,
+            #               bbox_to_anchor= (1.13, 1),
+            #               title = '\u03F5^(3)_(\u03B1,1) = {: .3f} \n'
+            #                       '\u03F5^(3)_(\u03B1,2) = {: .3f} \n'
+            #                       '\u03F5^(4)_(\u03B1,1) = {: .3f} \n'
+            #                       '\u03F5^(4)_(\u03B1,2) = {: .3f} \n'
+            #                       'Vg = {: .3f}'\
+            #                       .format(-0.17 - Vg, 0.3 - Vg,
+            #                                0.10 - Vg, 0.3 - Vg,
+            #                                Vg))
+            #fe_fe_b.legend(loc = 'upper right',
+            #               fontsize = 6,
+            #               title_fontsize = 7,
+            #               shadow = True,
+            #               bbox_to_anchor= (1.13, 1),
+            #               title = '\u03F5^(3)_(\u03B1,1) = {: .3f} \n'
+            #                       '\u03F5^(3)_(\u03B1,2) = {: .3f} \n'
+            #                       '\u03F5^(4)_(\u03B1,1) = {: .3f} \n'
+            #                       '\u03F5^(4)_(\u03B1,2) = {: .3f}'\
+            #                       .format(-0.17 - Vg, 0.3 - Vg,
+            #                               -0.17 - Vg, 0.3 - Vg))
+
+            ### Legend Vg
             fe_af_a.legend(loc = 'upper right',
                            fontsize = 5,
                            title_fontsize = 6,
                            shadow = True,
                            bbox_to_anchor= (1.13, 1),
-                           title = '\u03F5^(3)_(\u03B1,1) = {:.3f} \n'
-                                   '\u03F5^(3)_(\u03B1,2) = {:.3f} \n'
-                                   '\u03F5^(4)_(\u03B1,1) = {:.3f} \n'
-                                   '\u03F5^(4)_(\u03B1,2) = {:.3f}'\
-                                   .format(-0.17 - Vg, 0.3 - Vg, -0.17 - Vg, 0.1 - Vg))
-            fe_fe_b.legend(loc = 'upper right',
-                           fontsize = 6,
-                           title_fontsize = 7,
+                           title = 'Vg = {: .3f}'.format(Vg))
+            fe_fe_a.legend(loc = 'upper right',
+                           fontsize = 5,
+                           title_fontsize = 6,
                            shadow = True,
                            bbox_to_anchor= (1.13, 1),
-                           title = '\u03F5^(3)_(\u03B1,1) = {:.3f} \n'
-                                   '\u03F5^(3)_(\u03B1,2) = {:.3f} \n'
-                                   '\u03F5^(4)_(\u03B1,1) = {:.3f} \n'
-                                   '\u03F5^(4)_(\u03B1,2) = {:.3f}'\
-                                   .format(-0.17 - Vg, 0.3 - Vg, -0.17 - Vg, 0.3 - Vg))
+                           title = 'Vg = {: .3f}'.format(Vg))
 
             axs[0].set(xlabel = ' ')
             axs[0].set(ylabel = 'T(arb. units)')
