@@ -60,14 +60,17 @@ class Stellt_video:
                                                      'Energie_b_fe_fe'])
 
         try:
-            os.mkdir(os.path.join(self.sim_n_ord, 'pics'))
-            self.out_d_pic = os.path.join(self.sim_n_ord, 'pics')
+            os.mkdir(os.path.join(self.sim_n_ord, 'pics_T'))
+            self.out_d_pic_T = os.path.join(self.sim_n_ord, 'pics_T')
+            os.mkdir(os.path.join(self.sim_n_ord, 'pics_D'))
+            self.out_d_pic_D = os.path.join(self.sim_n_ord, 'pics_D')
         except FileExistsError:
-            self.out_d_pic = os.path.join(self.sim_n_ord, 'pics')
+            self.out_d_pic_T = os.path.join(self.sim_n_ord, 'pics_T')
+            self.out_d_pic_D = os.path.join(self.sim_n_ord, 'pics_D')
         else:
             pass
 
-    def Make_pics(self):
+    def Make_pics_T(self):
         for i in tqdm(range(self.pics)):
             Vg = self.df_ovoll['Vg_a_fe_af'][i * 2000]
             # Bilder
@@ -176,45 +179,147 @@ class Stellt_video:
             axs[1].set_xlim((-0.5, 0.5))
             axs[1].set_ylim((0,1))
 
-            self.voll_plot.figure.savefig(os.path.join(self.out_d_pic,
-                                               'pic0'+str(i)+'.png'), dpi=300)
+            self.voll_plot.figure.savefig(os.path.join(self.out_d_pic_T,
+                                               'picT0'+str(i)+'.png'), dpi=300)
 
-    def Make_vid(self):
+    def Make_pics_D(self):
+        for i in tqdm(range(self.pics)):
+            Vg = self.df_ovoll['Vg_a_fe_af'][i * 2000]
+            # Bilder
+            self.voll_plot, axs = plt.subplots(2)
+            fe_af_a = sns.lineplot(ax = axs[0],
+                         x = "Energie",
+                         y = "DOS_a_fe_af",
+                         data = self.df_ovoll[i * 2000 : 2000 * (i + 1)],
+                         linewidth=2,
+                         color='red',
+                         label='\u03B1')
+            fe_af_b = sns.lineplot(ax=axs[0],
+                         y = "DOS_b_fe_af",
+                         x = "Energie",
+                         data = self.df_ovoll[i * 2000 : 2000 * (i + 1)],
+                         linewidth=2,
+                         color='blue',
+                         label='\u03B2')
+            fe_fe_a = sns.lineplot(ax = axs[1],
+                         x = "Energie",
+                         y = "DOS_a_fe_fe",
+                         data = self.df_ovoll[i * 2000 : 2000 * (i + 1)],
+                         linewidth=2,
+                         color='red',
+                         label='\u03B1')
+            fe_fe_b = sns.lineplot(ax=axs[1],
+                         x = "Energie",
+                         y = "DOS_b_fe_fe",
+                         data = self.df_ovoll[i * 2000 : 2000 * (i + 1)],
+                         linewidth=2,
+                         color='blue',
+                         label='\u03B2')
+
+            l_fe_af_a = fe_af_a.lines[0]
+            x_fe_af_a = l_fe_af_a.get_xydata()[:,0]
+            y_fe_af_a = l_fe_af_a.get_xydata()[:,1]
+            fe_af_a.fill_between(x_fe_af_a, y_fe_af_a, color="red", alpha=0.3)
+
+            l_fe_af_b = fe_af_b.lines[1]
+            x_fe_af_b = l_fe_af_b.get_xydata()[:,0]
+            y_fe_af_b = l_fe_af_b.get_xydata()[:,1]
+            fe_af_b.fill_between(x_fe_af_b, y_fe_af_b, color="blue", alpha=0.3)
+
+            l_fe_fe_a = fe_fe_a.lines[0]
+            x_fe_fe_a = l_fe_fe_a.get_xydata()[:,0]
+            y_fe_fe_a = l_fe_fe_a.get_xydata()[:,1]
+            fe_fe_a.fill_between(x_fe_fe_a, y_fe_fe_a, color="red", alpha=0.3)
+
+            l_fe_fe_b = fe_fe_b.lines[1]
+            x_fe_fe_b = l_fe_fe_b.get_xydata()[:,0]
+            y_fe_fe_b = l_fe_fe_b.get_xydata()[:,1]
+            fe_fe_b.fill_between(x_fe_fe_b, y_fe_fe_b, color="blue", alpha=0.3)
+
+            ### Legend Vg
+            fe_af_a.legend(loc = 'upper right',
+                           fontsize = 5,
+                           title_fontsize = 6,
+                           shadow = True,
+                           bbox_to_anchor= (1.13, 1),
+                           title = 'Vg = {: .3f}'.format(Vg))
+            fe_fe_a.legend(loc = 'upper right',
+                           fontsize = 5,
+                           title_fontsize = 6,
+                           shadow = True,
+                           bbox_to_anchor= (1.13, 1),
+                           title = 'Vg = {: .3f}'.format(Vg))
+
+            axs[0].set(xlabel = ' ')
+            axs[0].set(ylabel = 'DOS(eV^{-1})')
+            axs[0].set_xlim((-0.5, 0.5))
+            axs[0].set_ylim((0.0, 50))
+            axs[1].set(xlabel = 'Energy (eV)')
+            axs[1].set(ylabel = 'DOS(eV^{-1})')
+            axs[1].set_xlim((-0.5, 0.5))
+            axs[1].set_ylim((0.0, 50))
+
+            self.voll_plot.figure.savefig(os.path.join(self.out_d_pic_D,
+                                               'picD0'+str(i)+'.png'), dpi=300)
+
+    def Make_vid_T(self):
         fps = 12
 
         # Video
-        bild = os.listdir(self.out_d_pic)
+        bild = os.listdir(self.out_d_pic_T)
         bild.sort(key=lambda f: int(re.sub('\D', '', f)))
 
-        bild_datei = [self.out_d_pic + '/' + img for img in bild]
+        bild_datei = [self.out_d_pic_T + '/' + img for img in bild]
 
         clip = moviepy.video.io.ImageSequenceClip.ImageSequenceClip(bild_datei, fps=fps)
-        clip.write_videofile(os.path.join(self.sim_n_ord , 'Toy_modell.mp4'))
+        clip.write_videofile(os.path.join(self.sim_n_ord , 'Toy_modell_T.mp4'))
+
+    def Make_vid_D(self):
+        fps = 12
+
+        # Video
+        bild = os.listdir(self.out_d_pic_D)
+        bild.sort(key=lambda f: int(re.sub('\D', '', f)))
+
+        bild_datei = [self.out_d_pic_D + '/' + img for img in bild]
+
+        clip = moviepy.video.io.ImageSequenceClip.ImageSequenceClip(bild_datei, fps=fps)
+        clip.write_videofile(os.path.join(self.sim_n_ord , 'Toy_modell_D.mp4'))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-i', '--input', help='Eingabe Ordner')
-    parser.add_argument('-p', '--pics', help='Menge von Bilder zu nutzen')
-    parser.add_argument('-v', '--video', help='Stellen ein Video her')
+    parser.add_argument('-pt', '--pics_t', help='Menge von Bilder zu nutzen.'
+                                                'Transmission')
+    parser.add_argument('-pd', '--pics_d', help='Menge von Bilder zu nutzen.'
+                                                'DOS')
+    parser.add_argument('-vt', '--video_t', help='Stellen ein Video her.'
+                                               'Transmission')
+    parser.add_argument('-vd', '--video_d', help='Stellen ein Video her. DOS')
 
 
     args = parser.parse_args()
 
-    if args.pics == None:
-        args.pics = 1
-    else:
-        pass
+    if args.input != None:
+        if args.pics_t != None and args.pics_d == None:
+            pfad_2_d = os.path.dirname(os.path.abspath(args.input))
+            stelltes_vid = Stellt_video(pfad_2_d, args.input, int(args.pics_t))
+            stelltes_vid.Make_pics_T()
 
-    if args.input != None and args.video == None:
-        pfad_2_d = os.path.dirname(os.path.abspath(args.input))
-        stelltes_vid = Stellt_video(pfad_2_d, args.input, int(args.pics))
-        stelltes_vid.Make_pics()
-
-    elif args.input != None and args.video == 'ja':
-        pfad_2_d = os.path.dirname(os.path.abspath(args.input))
-        stelltes_vid = Stellt_video(pfad_2_d, args.input, int(args.pics))
-        stelltes_vid.Make_vid()
+        elif args.pics_d != None and args.pics_t == None:
+            pfad_2_d = os.path.dirname(os.path.abspath(args.input))
+            stelltes_vid = Stellt_video(pfad_2_d, args.input, int(args.pics_d))
+            stelltes_vid.Make_pics_D()
+    
+        elif args.video_t != None and args.video_d == None:
+            pfad_2_d = os.path.dirname(os.path.abspath(args.input))
+            stelltes_vid = Stellt_video(pfad_2_d, args.input, 1)
+            stelltes_vid.Make_vid_T()
+        elif args.video_d != None and args.video_t == None:
+            pfad_2_d = os.path.dirname(os.path.abspath(args.input))
+            stelltes_vid = Stellt_video(pfad_2_d, args.input, 1)
+            stelltes_vid.Make_vid_D()
 
     else:
         print ('Fehler: Geben Sie bitte eine Eingabe')
