@@ -1,4 +1,4 @@
-Python Kode um video von eine Sequenz von Bilder herzustellen
+Python Kode um ein video von einer Bildersequenz herzustellen
 
 ** Flagge:
 * -i : Datei des Datens.

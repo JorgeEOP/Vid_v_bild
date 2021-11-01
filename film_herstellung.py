@@ -172,11 +172,11 @@ class Stellt_video:
 
             axs[0].set(xlabel = ' ')
             axs[0].set(ylabel = 'T(arb. units)')
-            axs[0].set_xlim((-0.5, 0.5))
+            axs[0].set_xlim((-0.2, 0.2))
             axs[0].set_ylim((0, 1))
             axs[1].set(xlabel = 'Energy (eV)')
             axs[1].set(ylabel = 'T(arb. units)')
-            axs[1].set_xlim((-0.5, 0.5))
+            axs[1].set_xlim((-0.2, 0.2))
             axs[1].set_ylim((0,1))
 
             self.voll_plot.figure.savefig(os.path.join(self.out_d_pic_T,
@@ -252,11 +252,11 @@ class Stellt_video:
 
             axs[0].set(xlabel = ' ')
             axs[0].set(ylabel = 'DOS(eV^{-1})')
-            axs[0].set_xlim((-0.5, 0.5))
+            axs[0].set_xlim((-0.2, 0.2))
             axs[0].set_ylim((0.0, 50))
             axs[1].set(xlabel = 'Energy (eV)')
             axs[1].set(ylabel = 'DOS(eV^{-1})')
-            axs[1].set_xlim((-0.5, 0.5))
+            axs[1].set_xlim((-0.2, 0.2))
             axs[1].set_ylim((0.0, 50))
 
             self.voll_plot.figure.savefig(os.path.join(self.out_d_pic_D,
@@ -271,7 +271,8 @@ class Stellt_video:
 
         bild_datei = [self.out_d_pic_T + '/' + img for img in bild]
 
-        clip = moviepy.video.io.ImageSequenceClip.ImageSequenceClip(bild_datei, fps=fps)
+        clip = moviepy.video.io.ImageSequenceClip.ImageSequenceClip(bild_datei,
+                                                                    fps=fps)
         clip.write_videofile(os.path.join(self.sim_n_ord , 'Toy_modell_T.mp4'))
 
     def Make_vid_D(self):
@@ -283,7 +284,8 @@ class Stellt_video:
 
         bild_datei = [self.out_d_pic_D + '/' + img for img in bild]
 
-        clip = moviepy.video.io.ImageSequenceClip.ImageSequenceClip(bild_datei, fps=fps)
+        clip = moviepy.video.io.ImageSequenceClip.ImageSequenceClip(bild_datei,
+                                                                    fps=fps)
         clip.write_videofile(os.path.join(self.sim_n_ord , 'Toy_modell_D.mp4'))
 
 if __name__ == '__main__':
